@@ -2,7 +2,10 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from colors import *
+from math import pi,sin,cos
+from shapes import SolidRectangle, SolidCylinder, SolidPrismaTriangular, DrawTower, DrawWall
 
+scale = 8.0
 angle_h = 300.0
 angle_v = 0
 spin = True
@@ -41,17 +44,21 @@ def keyboard(key,x,y):
         turn_v = 0
         render_quality = 100
 
+
 def display():
 
     global spin, angle_h, angle_v
 
+    glMatrixMode(GL_MODELVIEW)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     glClearColor(*blue_sky)
     glLoadIdentity()
 
-    gluLookAt(4.2, 1.4, 0.0, 0.0, 0.4, 0.0, 0.0, 1.0, 0.0)
-
-    # Controle de camera
+    gluLookAt(20.0, 10.0, 20.0,
+                0.0,  2.0,  0.0,
+                0.0,  1.0,  0.0)
+ 
+	# Controle de camera
     if spin:
         angle_h += turn_h*0.5
         angle_v += turn_v
@@ -61,98 +68,96 @@ def display():
     # Angulo do objeto
     glRotatef(angle_h, 0, 1, 0)
     glRotatef(angle_v, 1, 0, 1)
-    
-    glPushMatrix()
-    # Ajustando para centro
-    glTranslatef(0.0, 0.2, 0.0)
-    
+ 
     # Base
     glPushMatrix()
-    glTranslatef(0.0, -0.298, 0.0)
-    glRotatef(90, 1, 0, 0)
     glColor3f(*grass)
-    glutSolidCylinder(1.13, 0.002, 100, 1)
+    glBegin(GL_QUADS)
+    glNormal3f(  0.0, 1.0,   0.0)
+    glVertex3f(-30.0, 0.0, -30.0)
+    glVertex3f(-30.0, 0.0,  30.0)
+    glVertex3f( 30.0, 0.0,  30.0)
+    glVertex3f( 30.0, 0.0, -30.0)
+    glEnd()
+
+    # Chão do castelo
+    glColor3f(0.3, 0.3, 0.2)
+    glBegin(GL_QUADS)
+    glNormal3f( 0.0,  1.0,  0.0)
+    glVertex3f(-scale, 0.01, -scale)
+    glVertex3f(-scale, 0.01,  scale)
+    glVertex3f( scale, 0.01,  scale)
+    glVertex3f( scale, 0.01, -scale)
+    glEnd()
+
+    # Torre central
+    glPushMatrix()
+    glColor3f(*silver)
+    glTranslatef(0.0, 3.25, 0.0)
+    glPushMatrix()
+    glScaled(3.7, 10, 3.7)
+    glutSolidCube(1.0)
+    glPopMatrix()
+    glColor3f(*red)
+    glTranslatef(0.0, 6.5, 0.0)
+    SolidPrismaTriangular(4, 3, 4)
     glPopMatrix()
 
-    # Cor da neve
+    # Torre 1-2
+    glPushMatrix()
     glColor3f(*white)
-    # Bola maior
-    glTranslatef(0.0, 0.0, 0.0)
-    glutSolidSphere(0.45, render_quality, render_quality*2)
-    
-    # Bola meio
-    glTranslatef(0.0, 0.45, 0.0)
-    glutSolidSphere(0.3, render_quality, render_quality*2)
-    
-    #Bola cabeca
-    glTranslatef(0.0, 0.35, 0.0)
-    glutSolidSphere(0.25, render_quality, render_quality*2)
-    
-    # Olho Direito
+    glTranslatef(8, 0, -2)
     glPushMatrix()
-    glRotatef( 26.0, 0, 1, 0)
-    glTranslatef(0.21, 0.08, 0.0)
-    glColor3f(0.1, 0.1, 0.1)
-    glutSolidSphere(0.04, 8, 8)
+    glScaled(2.1, 8.5, 2.4)
+    glutSolidCube(1.0)
     glPopMatrix()
-
-    # Olho Esquerdo
+    glColor3f(*red)
+    glTranslatef(0.0, 5.1, 0.0)
+    SolidPrismaTriangular(3, 2, 4.5)
+    glPopMatrix()
     glPushMatrix()
-    glRotatef(-26.0, 0, 1, 0)
-    glTranslatef(0.21, 0.08, 0.0)
-    glutSolidSphere(0.04, 8, 8)
-    glPopMatrix()
-
-    # Nariz
+    glColor3f(*white)
+    glTranslatef(8, 0, 2)
     glPushMatrix()
-    glTranslatef(0.22, -0.01, 0.0)
-    glRotatef(90, 0, 1, 0)
-    glColor3f(0.8, 0.1, 0.2)
-    glutSolidCone(0.03, 0.18, 8, 6)
+    glScaled(2.1, 8.5, 2.4)
+    glutSolidCube(1.0)
     glPopMatrix()
+    glColor3f(*red)
+    glTranslatef(0.0, 5.1, 0.0)
+    SolidPrismaTriangular(3, 2, 4.5)
+    glPopMatrix()
+    
 
-    # Base do globo de neve
+    # Torre 1
+    DrawTower(light_gray,black,scale,scale)
+
+    # Parede 1-2
+    DrawWall(dark_gray,scale,scale/2,1,scale-2)
+    DrawWall(dark_gray,scale,-scale/2,1,scale-2)
+
+    # Torre 2
+    DrawTower(light_gray,black,scale,-scale)
+
+    # Parede 2-3
+    DrawWall(dark_gray,0,-scale,2*scale,1)
+
+    # Torre 3
+    DrawTower(light_gray,black,-scale,-scale)
+
+    # Parede 3-4
+    DrawWall(dark_gray,-scale,0,1,2*scale)
+
+    # Torre 4
+    DrawTower(light_gray,black,-scale,scale)
+
+    # Parede 4-1
+    DrawWall(dark_gray,0,scale,2*scale,1)
+
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-    glPushMatrix()
-    glTranslatef(0.0, -1.1, 0.0)
-    glColor3f(*dark_gray)
-    glRotatef(90, 1, 0, 0)
-    glutSolidCylinder(1.23, 0.4, 100, 1)
-    glPopMatrix()
-    glPushMatrix()
-    glTranslatef(0.0, -1.13, 0.0)
-    glColor3f(*light_gray)
-    glPushMatrix()
-    glRotatef(90, 1, 0, 0)
-    glutSolidCylinder(1.3, 0.4, 100, 1)
-    glPopMatrix()
-    glTranslatef(0.0, -0.08, 0.0)
-    glColor3f(*dark_gray)
-    glPushMatrix()
-    glRotatef(90, 1, 0, 0)
-    glutSolidCylinder(1.308, 0.24, 100, 1)
-    glPopMatrix()
-    glPopMatrix()
-
-    # Globo de vidro
-    #Interno
-    glPushMatrix()
-    glColor4f(0.8, 0.8, 0.8, 0.05)
-    glTranslatef(0.0, -0.5, 0.0)
-    glRotatef(90.0, 1, 0, 0)
-    glutSolidSphere(1.3, render_quality, render_quality)
-    glPopMatrix()
-    #Externo
-    glPushMatrix()
-    glColor4f(0.8, 0.8, 0.8, 0.1)
-    glTranslatef(0.0, -0.5, 0.0)
-    glRotatef(90.0, 1, 0, 0)
-    glutSolidSphere(1.4, render_quality, render_quality)
-    glPopMatrix()
-
     glDisable(GL_BLEND)
     glPopMatrix()
+
     glFlush()
     glutSwapBuffers()
 
@@ -163,16 +168,15 @@ height = 600
 glutInit()
 glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH)
 glutInitWindowSize(width, height)
-glutCreateWindow("Boneco de Neve - Menderson e Vinicius")
+glutCreateWindow("Castelo - Menderson e Vinicius")
 
 glutDisplayFunc(display)
 glutIdleFunc(display)
 glutKeyboardFunc(keyboard)
 
-glMatrixMode(GL_PROJECTION)
 glViewport(0, 0, width, height)
-glMatrixMode(GL_PROJECTION)
 glLoadIdentity()
+glMatrixMode(GL_PROJECTION)
 aspect = width / height
 gluPerspective(45, aspect, .01, 100.0)
 glMatrixMode(GL_MODELVIEW)
@@ -183,15 +187,13 @@ glDepthFunc(GL_LEQUAL)
 glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
 glClearColor(0.0, 0.0, 0.0, 1.0)
 
-# Controle de textura
-mat_shininess =  [ 15.0 ]
-mat_specular =    [ 0.75, 0.75, 0.75, 0.75 ]
+mat_shininess  = [ 8.0 ]
+mat_specular   = [ 0.75, 0.75, 0.75, 0.75 ]
 
-# Controle de luz
-light_ambient =  [   0.6, 0.6, 0.6, 1.0 ]
-light_diffuse =  [   0.8, 0.8, 0.8, 0.8 ]
-light_specular = [   1.0, 1.0, 1.0, 0.3 ]
-light_position = [   6.0, 6.0, 2.0, 0.0 ]
+light_ambient  = [ 0.4, 0.4, 0.4, 1.0]
+light_diffuse  = [ 0.8, 0.8, 0.8, 0.9]
+light_specular = [ 1.0, 1.0, 1.0, 0.1]
+light_position = [ 6.0, 6.0, 2.0, 0.0]
 
 glMaterialfv(GL_FRONT, GL_SPECULAR,  mat_specular)
 glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess)
