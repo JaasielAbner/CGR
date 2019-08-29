@@ -2,6 +2,7 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from colors import *
+from shapes import SolidCylinder
 
 angle_h = 300.0
 angle_v = 0
@@ -77,6 +78,7 @@ def display():
     # Cor da neve
     glColor3f(*white)
     # Bola maior
+
     glTranslatef(0.0, 0.0, 0.0)
     glutSolidSphere(0.45, render_quality, render_quality*2)
     
@@ -87,6 +89,7 @@ def display():
     #Bola cabeca
     glTranslatef(0.0, 0.35, 0.0)
     glutSolidSphere(0.25, render_quality, render_quality*2)
+
     
     # Olho Direito
     glPushMatrix()
@@ -107,11 +110,23 @@ def display():
     glPushMatrix()
     glTranslatef(0.22, -0.01, 0.0)
     glRotatef(90, 0, 1, 0)
-    glColor3f(0.8, 0.1, 0.2)
+    glColor3f(*red)
     glutSolidCone(0.03, 0.18, 8, 6)
     glPopMatrix()
 
-    # Base do globo de neve
+    # Chapeuzinho
+    glColor3f(*black)
+    glPushMatrix()
+    glTranslatef(0, 0.25, 0)
+    SolidCylinder(0.2,0.03,render_quality)
+    glColor3f(*red)
+    glTranslatef(0, 0.08, 0)
+    SolidCylinder(0.11,0.05,render_quality)
+    glColor3f(*dark_gray)
+    SolidCylinder(0.1,0.3,render_quality)
+    glPopMatrix()
+
+    # Base do globo de vidro
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glPushMatrix()
