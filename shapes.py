@@ -229,3 +229,14 @@ def DrawWall(wall_color, x, y, u, v):
     glScaled(u, 3.6, v)
     glutSolidCube(1.0)
     glPopMatrix()
+
+class Flake:
+    def __init__(self):
+        self.viva;
+        self.vida;
+        self.desaparecer;
+        self.xPos;
+        self.yPos;
+        self.zPos;
+        self.vel;
+        self.gravidade;

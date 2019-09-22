@@ -3,6 +3,7 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from colors import *
 from shapes import SolidCylinder
+from random import randint as rand
 
 angle_h = 300.0
 angle_v = 0
@@ -10,6 +11,13 @@ spin = True
 turn_h = 1
 turn_v = 0
 render_quality = 100 # max = 100
+
+flakes_quantity = 4000
+flakes = []
+radius = 0.85
+
+width  = 800
+height = 600
 
 def keyboard(key,x,y):
     global spin, turn_h, turn_v, angle_h, angle_v, render_quality
@@ -42,19 +50,64 @@ def keyboard(key,x,y):
         turn_v = 0
         render_quality = 100
 
+def dist(Ponto):
+    x = Ponto.xPos
+    y = Ponto.yPos
+    z = Ponto.zPos
+    return (x*x+y*y+z*z)**(1/2)
+
+class Flake:
+    def __init__(self):
+        self.viva = True
+        self.vida = 2
+        self.desaparecer = rand(1,100) * 0.005
+        self.xPos = rand(-1000,1000) / 1000
+        self.yPos = 1.8
+        self.zPos = rand(-1000,1000) /  1000
+        self.vel = -rand(1,2) * 0.005
+        self.gravidade = -0.000015
+        self.ground = False 
+
+def init():
+    global flakes
+    flakes = [Flake() for i in range(flakes_quantity)]
+
+def snowRain():
+    global flakes, radius
+    glColor3f(*white)
+    for loop in range(0,flakes_quantity,2):
+        if dist(flakes[loop]) >= 2*radius: flakes[loop].viva = False        # Se o ponto estiver fora do globo, definimos como morta
+        else: flakes[loop].viva = True
+        if flakes[loop].viva:
+            x = flakes[loop].xPos
+            y = flakes[loop].yPos
+            z = flakes[loop].zPos 
+            glLineWidth(rand(10,20)/10)                                     # gerando linhas de espessuras diferentes
+            glBegin(GL_LINES)
+            glVertex3f(x, y, z)                                             # faz as linhas ficarem em 90º com o x-1
+            glVertex3f(x, y + 0.01, z)                                      # tamanho do floco
+            glEnd()
+        if flakes[loop].yPos < -0.02: flakes[loop].ground = True            # definindo colisão com o chão
+        if not flakes[loop].ground: flakes[loop].yPos += flakes[loop].vel   # caso não colida, incrementa posição
+        flakes[loop].vel += flakes[loop].gravidade
+        flakes[loop].vida -= flakes[loop].desaparecer
+        if (flakes[loop].vida < 0.0):
+            flakes[loop] = Flake()
+
 def display():
-
     global spin, angle_h, angle_v
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    
+    # Instanciando neve
+    snowRain()
+
     glClearColor(*blue_sky)
     glLoadIdentity()
 
     gluLookAt(4.2, 1.4, 0.0, 0.0, 0.4, 0.0, 0.0, 1.0, 0.0)
-
     # Controle de camera
     if spin:
-        angle_h += turn_h*0.5
+        angle_h += turn_h*0.2
         angle_v += turn_v
     angle_h %= 360
     angle_v %= 360
@@ -171,16 +224,22 @@ def display():
     glFlush()
     glutSwapBuffers()
 
+def reshape(w, h):
+	glViewport(0, 0, w, h)
+	glMatrixMode(GL_PROJECTION)
+	glLoadIdentity()
+	gluPerspective(55, w / h, .1, 200)
+	glMatrixMode(GL_MODELVIEW)
+	glLoadIdentity()
 
-
-width  = 800
-height = 600
 glutInit()
 glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH)
 glutInitWindowSize(width, height)
-glutCreateWindow("Boneco de Neve - Menderson e Vinicius")
+glutCreateWindow("Boneco de Neve V2 - Menderson e Vinicius")
 
+init()
 glutDisplayFunc(display)
+# glutReshapeFunc(reshape)
 glutIdleFunc(display)
 glutKeyboardFunc(keyboard)
 
