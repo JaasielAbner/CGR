@@ -163,15 +163,17 @@ class Robot:
         glPopMatrix()
         glPopMatrix()
 
-robo = Robot()
-angle = 300.0
-angle_arms=300.0
-spin = True
-turn_h = 1
-up_arms = False
+robo            = Robot()
+angle           = 300.0
+left_angle_arm  = 300.0
+right_angle_arm = 300.0
+spin            = True
+turn_h          = 1
+left_up_arm     = False
+right_up_arm    = False
 
 def keyboard(key,x,y):
-    global spin, turn_h, angle, up_arms
+    global spin, turn_h, angle, left_up_arm, right_up_arm
 
     key = ord(key)
     # Esc para sair
@@ -180,17 +182,15 @@ def keyboard(key,x,y):
     elif key==ord('s'):
         spin = not spin
     elif key==ord('a'):
-        turn_h = -1
+        left_up_arm = True
     elif key==ord('d'):
-        turn_h = 1
-    elif key==ord('u'):
-        up_arms = True
+        right_up_arm = True
     else:
         return
         
 
 def display():
-    global spin, angle, up_arms, angle_arms
+    global spin, angle, left_angle_arm, right_angle_arm, left_up_arm, right_up_arm
 
     glMatrixMode(GL_MODELVIEW)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -206,9 +206,13 @@ def display():
         angle += turn_h*0.5
     angle %= 360
 
-    if up_arms:
-        angle_arms += turn_h*0.5
-    angle_arms %= 360
+    if left_up_arm:
+        left_angle_arm += turn_h*0.5
+    left_angle_arm %= 360
+    
+    if right_up_arm:
+        right_angle_arm += turn_h*0.5
+    right_angle_arm %= 360
 
     robo.rightLegFAngle = cos(angle / 180.0 * 4.0 * pi) * 22.5
     robo.rightKneeAngle = (-sin(angle / 180.0 * 4.0 * pi) + 1) * 30.0
@@ -217,13 +221,18 @@ def display():
     robo.rightLegSAngle = (sin(angle / 180.0 * 4.0 * pi) + 1) * 5.0
     robo.leftLegSAngle = (sin(angle / 180.0 * 4.0 * pi) + 1) * -5.0
     
-    if up_arms:
+    if right_up_arm:
         if robo.rightArmFAngle<0.0:
-            up_arms = False
-        robo.rightArmFAngle = abs(cos(angle_arms / 180.0 * 4.0 * pi) * 150)-1
+            right_up_arm = False
+        robo.rightArmFAngle = abs(cos(right_angle_arm / 180.0 * 4.0 * pi) * 150)-1
+
+    if left_up_arm:
+        if robo.leftArmFAngle<0.0:
+            left_up_arm = False
+        
         #robo.rightArmSAngle = (sin(angle_arms / 180.0 * 4.0 * pi) + 1) * 0.0
         #robo.rightElbowFAngle = abs((-sin(angle_arms / 180.0 * 4.0 * pi)) * 15.0)
-        robo.leftArmFAngle = abs(cos((angle_arms + 180.0) / 180.0 * 4.0 * pi) * 150)-1
+        robo.leftArmFAngle = abs(cos((left_angle_arm + 180.0) / 180.0 * 4.0 * pi) * 150)-1
         #robo.leftArmSAngle = (sin(angle_arms / 180.0 * 4.0 * pi) + 1) * -0.0
         #robo.leftElbowFAngle = abs((-sin((angle_arms + 90.0) / 180.0 * 4.0 * pi)) * 15.0)
         
