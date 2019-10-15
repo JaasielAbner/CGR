@@ -188,16 +188,18 @@ class Robot:
 
 robo = Robot()
 angle = 300.0
+leg_angle = 300.0
 left_angle_arm = 300.0
 right_angle_arm = 300.0
 spin = True
 turn_h = 1
 action_left_arm = False
 action_right_arm = False
+speed = 0.5
 
 
 def keyboard(key, x, y):
-    global spin, turn_h, angle, action_left_arm, action_right_arm
+    global spin, turn_h, angle, action_left_arm, action_right_arm, speed
 
     key = ord(key)
     # Esc para sair
@@ -209,12 +211,16 @@ def keyboard(key, x, y):
         action_left_arm = True
     elif key == ord('d'):
         action_right_arm = True
+    elif key == ord('+'):
+        speed += 0.1
+    elif key == ord('-'):
+        speed -= 0.1
     else:
         return
 
 
 def display():
-    global spin, angle, left_angle_arm, right_angle_arm, action_left_arm, action_right_arm
+    global spin, angle, left_angle_arm, right_angle_arm, action_left_arm, action_right_arm, leg_angle
 
     glMatrixMode(GL_MODELVIEW)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -227,25 +233,29 @@ def display():
 
     # Controle de camera
     if spin:
-        angle += turn_h*0.5
+        angle += 0.5
     angle %= 360
 
     # Incremento braco esquerdo
     if action_left_arm:
-        left_angle_arm += turn_h*0.5
+        left_angle_arm += 0.5
     left_angle_arm %= 360
 
     # Incremento braco direito
     if action_right_arm:
-        right_angle_arm += turn_h*0.5
+        right_angle_arm += 0.5
     right_angle_arm %= 360
 
-    robo.rightLegFAngle = cos(angle / 180.0 * 4.0 * pi) * 22.5
-    robo.rightKneeAngle = (-sin(angle / 180.0 * 4.0 * pi) + 1) * 30.0
-    robo.leftLegFAngle = cos((angle + 180.0) / 180.0 * 4.0 * pi) * -22.5
-    robo.leftKneeAngle = (sin((angle + 90.0) / 180.0 * 4.0 * pi) + 1) * 30.0
-    robo.rightLegSAngle = (sin(angle / 180.0 * 4.0 * pi) + 1) * 5.0
-    robo.leftLegSAngle = (sin(angle / 180.0 * 4.0 * pi) + 1) * -5.0
+    # Incremento pernas
+    leg_angle += speed
+    leg_angle %= 360
+
+    robo.rightLegFAngle = cos(leg_angle / 180.0 * 4.0 * pi) * (22.5+10*speed)
+    robo.rightKneeAngle = (-sin(leg_angle / 180.0 * 4.0 * pi) + 1) * (30.0+5*speed)
+    robo.leftLegFAngle = cos((leg_angle + 180.0) / 180.0 * 4.0 * pi) * (-22.5-10*speed)
+    robo.leftKneeAngle = (sin((leg_angle + 90.0) / 180.0 * 4.0 * pi) + 1) * (30.0+5*speed)
+    robo.rightLegSAngle = (sin(leg_angle / 180.0 * 4.0 * pi) + 1) * 5.0
+    robo.leftLegSAngle = (sin(leg_angle / 180.0 * 4.0 * pi) + 1) * -5.0
 
     if action_right_arm:
         if robo.rightArmFAngle < 0.0:
